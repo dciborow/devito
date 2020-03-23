@@ -1,5 +1,7 @@
+import pytest
+
 from conftest import skipif
-from devito import Grid, TimeFunction, Eq, Operator, switchconfig
+from devito import Grid, TimeFunction, Eq, Operator, configuration, switchconfig
 from devito.ir.iet import retrieve_iteration_tree
 
 pytestmark = skipif(['yask', 'ops'])
@@ -41,3 +43,20 @@ class TestOperator(object):
     @switchconfig(platform='nvidiaX', language='openacc')
     def test_iso_ac(self):
         self.TestGPUOpenMPOperator().test_iso_ac()
+
+
+class TestMPI(object):
+
+    def test_basic(self):
+        #TODO DROP ME
+        configuration['mpi'] = True
+        grid = Grid(shape=(3, 3))
+        x, y = grid.dimensions
+        t = grid.stepping_dim
+
+        u = TimeFunction(name='u', grid=grid, space_order=2)
+        u.data[:] = 1.
+
+        op = Operator(Eq(u.forward, u[t, x, y-1] + u[t, x, y] + u[t, x, y+1]),
+                      platform='nvidiaX', language='openacc')
+        from IPython import embed; embed()
