@@ -11,7 +11,7 @@ from devito.ir import (ArrayCast, Element, Expression, List, LocalExpression,
                        FindNodes, MapExprStmts, Transformer)
 from devito.passes.iet.engine import iet_pass
 from devito.symbolics import ccode
-from devito.tools import flatten
+from devito.tools import flatten, prod
 
 __all__ = ['DataManager', 'Storage']
 
@@ -78,9 +78,9 @@ class DataManager(object):
         decl = "(*%s)%s" % (obj.name, "".join("[%s]" % i for i in obj.symbolic_shape[1:]))
         decl = c.Value(obj._C_typedata, decl)
 
-        shape = "".join("[%s]" % i for i in obj.symbolic_shape)
-        alloc = "posix_memalign((void**)&%s, %d, sizeof(%s%s))"
-        alloc = alloc % (obj.name, obj._data_alignment, obj._C_typedata, shape)
+        size = prod(obj.symbolic_shape)
+        alloc = "posix_memalign((void**)&%s, %d, sizeof(%s[%s]))"
+        alloc = alloc % (obj.name, obj._data_alignment, obj._C_typedata, size)
         alloc = c.Statement(alloc)
 
         free = c.Statement('free(%s)' % obj.name)
