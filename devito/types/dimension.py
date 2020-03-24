@@ -137,7 +137,7 @@ class Dimension(ArgProvider):
     @cached_property
     def symbolic_size(self):
         """Symbolic size of the Dimension."""
-        return Scalar(name=self.size_name, dtype=np.int32, is_const=True)
+        return Scalar(name=self.size_name, dtype=np.int32)
 
     @cached_property
     def symbolic_min(self):
